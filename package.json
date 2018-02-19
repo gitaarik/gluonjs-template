@@ -4,7 +4,9 @@
   "description": "",
   "main": "gluonjs-template.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "rollup -c",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "browser-sync start --config browsersync.config.js"
   },
   "author": "",
   "license": "MIT",
@@ -15,6 +17,7 @@
     "babel-core": "^6.26.0",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.6.1",
+    "browser-sync": "^2.23.6",
     "http-server": "^0.11.1",
     "rollup": "^0.55.5",
     "rollup-plugin-babel": "^3.0.3",

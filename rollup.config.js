@@ -12,71 +12,51 @@ const includePathOptions = {
   extensions: ['.js']
 };
 
-function getGluonJSConfig({
-  dest,
-  format,
-  uglified = true,
-  transpiled = false,
-  bundled = true
-}) {
+function getConfig({ dest, format, uglified = true, transpiled = false, bundled = true }) {
   return {
-    input: 'node_modules/gluonjs/gluon.js',
+    input: 'gluonjs-template.js',
     output: {
       exports: 'named',
       file: dest,
       format,
-      name: 'GluonJS',
-      sourcemap: true
+      name: 'GluonjsTemplate',
+      banner: !bundled && transpiled ? 'var gluon_js = GluonJS;' : undefined
     },
-    external: bundled ? [] : [
-      path.resolve('./lit-html/lib/lit-extended.js'),
-      path.resolve('./lit-html/lib/shady-render.js')
-    ],
+    external: bundled ? [] : [path.resolve('./gluonjs/gluon.js')],
     plugins: [
       bundled && includePaths(includePathOptions),
       transpiled && resolve(),
-      transpiled && commonjs({
-        include: 'node_modules/**'
-      }),
-      transpiled && babel({
-        presets: [['env', { modules: false }]],
-        plugins: ['transform-runtime'],
-        runtimeHelpers: true,
-        exclude: 'node_modules/**'
-      }),
-      uglified && uglify({
-        warnings: true,
-        toplevel: !transpiled,
-        sourceMap: true,
-        compress: { passes: 2 },
-        mangle: { properties: false }
-      }, uglifier),
+      transpiled &&
+        commonjs({
+          include: 'node_modules/**'
+        }),
+      transpiled &&
+        babel({
+          presets: [['env', { modules: false }]],
+          plugins: ['transform-runtime'],
+          runtimeHelpers: true,
+          exclude: 'node_modules/**'
+        }),
+      uglified &&
+        uglify(
+          {
+            warnings: true,
+            toplevel: !transpiled,
+            sourceMap: true,
+            compress: { passes: 2 },
+            mangle: { properties: false }
+          },
+          uglifier
+        ),
       filesize()
     ].filter(Boolean)
   };
 }
 
-const bundled = {
-  input: 'gluonjs-template.js',
-  output: {
-    file: 'build/bundled.js',
-    format: 'iife',
-    banner: 'var gluon_js = GluonJS;',
-    sourcemap: false
-  },
-  external: [path.resolve('/node_modules/gluonjs/gluon.js')],
-  plugins: [
-    babel({
-      presets: [['env', { modules: false }]]
-    })
-  ]
-};
-
 const config = [
-  getGluonJSConfig({ dest: 'build/gluon.es5.js', format: 'iife', transpiled: true }),
-  getGluonJSConfig({ dest: 'build/gluon.umd.js', format: 'umd' }),
-  getGluonJSConfig({ dest: 'build/gluon.js', format: 'es', bundled: false }),
-  bundled
+  getConfig({ dest: 'build/gluonjs-template.es5.js', format: 'iife', transpiled: true, bundled: false, uglified: false }),
+  getConfig({ dest: 'build/gluonjs-template.js', format: 'es', bundled: false, uglified: false }),
+  getConfig({ dest: 'build/gluonjs-template.bundle.js', format: 'iife', transpiled: true, uglified: false })
 ];
 
 export default config;
