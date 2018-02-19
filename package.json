@@ -1,0 +1,27 @@
+{
+  "name": "gluonjs-template",
+  "version": "1.0.0",
+  "description": "",
+  "main": "gluonjs-template.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "gluonjs": "^2.1.0"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.6.1",
+    "http-server": "^0.11.1",
+    "rollup": "^0.55.5",
+    "rollup-plugin-babel": "^3.0.3",
+    "rollup-plugin-commonjs": "^8.3.0",
+    "rollup-plugin-filesize": "^1.5.0",
+    "rollup-plugin-includepaths": "^0.2.2",
+    "rollup-plugin-node-resolve": "^3.0.2",
+    "rollup-plugin-uglify": "^3.0.0"
+  }
+}
