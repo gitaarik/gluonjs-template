@@ -12,9 +12,9 @@ const includePathOptions = {
   extensions: ['.js']
 };
 
-function getConfig({ dest, format, uglified = true, transpiled = false, bundled = true }) {
+function getConfig({ src, dest, format, uglified = true, transpiled = false, bundled = true }) {
   return {
-    input: 'gluonjs-template.js',
+    input: src,
     output: {
       exports: 'named',
       file: dest,
@@ -27,36 +27,37 @@ function getConfig({ dest, format, uglified = true, transpiled = false, bundled 
       bundled && includePaths(includePathOptions),
       transpiled && resolve(),
       transpiled &&
-        commonjs({
-          include: 'node_modules/**'
-        }),
+      commonjs({
+        include: 'node_modules/**'
+      }),
       transpiled &&
-        babel({
-          presets: [['env', { modules: false }]],
-          plugins: ['transform-runtime'],
-          runtimeHelpers: true,
-          exclude: 'node_modules/**'
-        }),
+      babel({
+        presets: [['env', { modules: false }]],
+        plugins: ['transform-runtime'],
+        runtimeHelpers: true,
+        exclude: ['node_modules/core-js/**', 'node_modules/babel-runtime/**']
+      }),
       uglified &&
-        uglify(
-          {
-            warnings: true,
-            toplevel: !transpiled,
-            sourceMap: true,
-            compress: { passes: 2 },
-            mangle: { properties: false }
-          },
-          uglifier
-        ),
+      uglify(
+        {
+          warnings: true,
+          toplevel: !transpiled,
+          sourceMap: true,
+          compress: { passes: 2 },
+          mangle: { properties: false }
+        },
+        uglifier
+      ),
       filesize()
     ].filter(Boolean)
   };
 }
 
 const config = [
-  getConfig({ dest: 'build/gluonjs-template.es5.js', format: 'iife', transpiled: true, bundled: false, uglified: false }),
-  getConfig({ dest: 'build/gluonjs-template.js', format: 'es', bundled: false, uglified: false }),
-  getConfig({ dest: 'build/gluonjs-template.bundle.js', format: 'iife', transpiled: true, uglified: false })
+  getConfig({ src: './gluonjs-template.js', dest: 'build/app.es5.js', format: 'iife', transpiled: true, bundled: true, uglified: false }),
+  getConfig({ src: './gluonjs-template.js', dest: 'build/app.js', format: 'iife', bundled: true, uglified: false }),
+  getConfig({ src: './gluonjs-template.js', dest: 'build/app.es5.min.js', format: 'iife', transpiled: true, bundled: true, uglified: true }),
+  getConfig({ src: './gluonjs-template.js', dest: 'build/app.min.js', format: 'iife', bundled: true, uglified: true })
 ];
 
 export default config;
