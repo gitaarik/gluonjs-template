@@ -781,18 +781,66 @@ class EventPart {
     }
 }
 
-const e = Symbol("tag"); const s = Symbol("needsRender"); const i = t => t.replace(/([a-z])([A-Z])|(.)([A-Z][a-z])/g, "$1$3-$2$4").toLowerCase(); const o = t => { t.$ = {}, t.shadowRoot.querySelectorAll("[id]").forEach(e => { t.$[e.id] = e; }); }; class h extends HTMLElement { static get is() { return this.hasOwnProperty(e) && this[e] || (this[e] = i(this.name)) } connectedCallback() { "template" in this && (this.attachShadow({ mode: "open" }), this.render({ sync: !0 }), o(this)); } async render({ sync: e = !1 } = {}) { this[s] = !0, e || await 0, this[s] && (this[s] = !1, render$1(this.template, this.shadowRoot, this.constructor.is)); } }
+const e=Symbol("tag"); const s=Symbol("needsRender"); const i=t=>t.replace(/([a-z])([A-Z])|(.)([A-Z][a-z])/g,"$1$3-$2$4").toLowerCase(); const o=t=>{t.$={}, t.shadowRoot.querySelectorAll("[id]").forEach(e=>{t.$[e.id]=e;});};class h extends HTMLElement{static get is(){return this.hasOwnProperty(e)&&this[e]||(this[e]=i(this.name))}connectedCallback(){"template"in this&&(this.attachShadow({mode:"open"}), this.render({sync:!0}), o(this));}async render({sync:e=!1}={}){this[s]=!0, e||await 0, this[s]&&(this[s]=!1, render$1(this.template,this.shadowRoot,this.constructor.is));}}
 
 class GluonjsTemplate extends h {
+
+  set loading(value) {
+    this._loading = value;
+    this.render();
+  }
+
+  get loading() {
+    return this._loading;
+  }
+
   get template() {
-    return html$1`<div>GluonJS is working!</div>`;
+
+    console.log('rendering with loading: ', this.loading);
+
+    return html$1`
+      <div>
+
+        <my-button on-click=${this.switchLoading.bind(this)} loading?=${this.loading}>
+          click me
+        </my-button>
+
+        <my-button on-click=${this.switchLoading.bind(this)} loading?=${!this.loading}>
+          click me
+        </my-button>
+
+      </div>
+    `;
+
   }
-  static get is() {
-    return 'gluonjs-template';
+
+  switchLoading() {
+    this.loading = !this.loading;
   }
+
 }
 
 customElements.define(GluonjsTemplate.is, GluonjsTemplate);
+
+
+class MyButton extends h {
+
+  get template() {
+
+    console.log('loading attribute: ', this.hasAttribute('loading'));
+
+    return html$1`
+      <div>
+        <slot></slot>
+        (loading: ${this.hasAttribute('loading') ? 'yes' : 'no'})
+      </div>
+    `;
+
+  }
+
+}
+
+customElements.define(MyButton.is, MyButton);
 
 return exports;
 

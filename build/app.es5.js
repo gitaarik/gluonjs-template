@@ -4171,7 +4171,8 @@ var h = function (_HTMLElement) {
   return h;
 }(HTMLElement);
 
-var _templateObject = _taggedTemplateLiteral(['<div>GluonJS is working!</div>'], ['<div>GluonJS is working!</div>']);
+var _templateObject = _taggedTemplateLiteral(['\n      <div>\n\n        <my-button on-click=', ' loading?=', '>\n          click me\n        </my-button>\n\n        <my-button on-click=', ' loading?=', '>\n          click me\n        </my-button>\n\n      </div>\n    '], ['\n      <div>\n\n        <my-button on-click=', ' loading?=', '>\n          click me\n        </my-button>\n\n        <my-button on-click=', ' loading?=', '>\n          click me\n        </my-button>\n\n      </div>\n    ']);
+var _templateObject2 = _taggedTemplateLiteral(['\n      <div>\n        <slot></slot>\n        (loading: ', ')\n      </div>\n    '], ['\n      <div>\n        <slot></slot>\n        (loading: ', ')\n      </div>\n    ']);
 
 var GluonjsTemplate = function (_GluonElement) {
   _inherits(GluonjsTemplate, _GluonElement);
@@ -4183,14 +4184,26 @@ var GluonjsTemplate = function (_GluonElement) {
   }
 
   _createClass(GluonjsTemplate, [{
+    key: 'switchLoading',
+    value: function switchLoading() {
+      this.loading = !this.loading;
+    }
+  }, {
+    key: 'loading',
+    set: function set(value) {
+      this._loading = value;
+      this.render();
+    },
+    get: function get() {
+      return this._loading;
+    }
+  }, {
     key: 'template',
     get: function get() {
-      return html$2(_templateObject);
-    }
-  }], [{
-    key: 'is',
-    get: function get() {
-      return 'gluonjs-template';
+
+      console.log('rendering with loading: ', this.loading);
+
+      return html$2(_templateObject, this.switchLoading.bind(this), this.loading, this.switchLoading.bind(this), !this.loading);
     }
   }]);
 
@@ -4198,6 +4211,30 @@ var GluonjsTemplate = function (_GluonElement) {
 }(h);
 
 customElements.define(GluonjsTemplate.is, GluonjsTemplate);
+
+var MyButton = function (_GluonElement2) {
+  _inherits(MyButton, _GluonElement2);
+
+  function MyButton() {
+    _classCallCheck(this, MyButton);
+
+    return _possibleConstructorReturn(this, (MyButton.__proto__ || _Object$getPrototypeOf(MyButton)).apply(this, arguments));
+  }
+
+  _createClass(MyButton, [{
+    key: 'template',
+    get: function get() {
+
+      console.log('loading attribute: ', this.hasAttribute('loading'));
+
+      return html$2(_templateObject2, this.hasAttribute('loading') ? 'yes' : 'no');
+    }
+  }]);
+
+  return MyButton;
+}(h);
+
+customElements.define(MyButton.is, MyButton);
 
 return exports;
 
