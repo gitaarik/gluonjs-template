@@ -1,4 +1,4 @@
-import { GluonElement, html } from './node_modules/gluonjs/gluon.js';
+import { GluonElement, html } from '@gluon/gluon/gluon.js';
 
 class GluonjsTemplate extends GluonElement {
   get template() {

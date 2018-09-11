@@ -1,63 +1,89 @@
-import filesize from 'rollup-plugin-filesize';
-import uglify from 'rollup-plugin-uglify';
-import { uglifier } from 'uglify-es';
-import babel from 'rollup-plugin-babel';
-import includePaths from 'rollup-plugin-includepaths';
-import resolve from 'rollup-plugin-node-resolve';
+import nodeResolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
-import * as path from 'path';
+import babel from 'rollup-plugin-babel';
+import babelMinify from 'rollup-plugin-babel-minify';
+import filesize from 'rollup-plugin-filesize';
 
-const includePathOptions = {
-  paths: ['node_modules/gluonjs'],
-  extensions: ['.js']
-};
+const files = ['gluonjs-template'];
 
-function getConfig({ src, dest, format, uglified = true, transpiled = false, bundled = true }) {
+function getConfig({ name = '', suffix = '', transpile = false, minify = true }) {
+
   return {
-    input: src,
+
+    input: 'src/' + name + '.js',
+
     output: {
-      exports: 'named',
-      file: dest,
-      format,
-      name: 'GluonjsTemplate',
-      banner: !bundled && transpiled ? 'var gluon_js = GluonJS;' : undefined
+
+      file: 'build/' + name + suffix + '.js',
+
+      // Make the output a immediately-invoked function expression, which is
+      // suitable for <script> tags.
+      format: 'iife',
+
+      // Create sourcemap (.js.map) files, this makes debugging easier.
+      sourcemap: true
+
     },
-    external: bundled ? [] : [path.resolve('./gluonjs/gluon.js')],
+
     plugins: [
-      bundled && includePaths(includePathOptions),
-      transpiled && resolve(),
-      transpiled &&
+
+      // Enable rollup to find NPM modules in the node_modules/ directory.
+      nodeResolve(),
+
+      // Convert CommonJS modules to ES modules, so these modules work in
+      // browsers.
       commonjs({
         include: 'node_modules/**'
       }),
-      transpiled &&
-      babel({
-        presets: [['env', { modules: false }]],
-        plugins: ['transform-runtime'],
-        runtimeHelpers: true,
-        exclude: ['node_modules/core-js/**', 'node_modules/babel-runtime/**']
+
+      // Transpile ES6 syntax to ES5 syntax, for compatibility with older
+      // browsers.
+      transpile && babel({
+
+        exclude: [
+          // Node modules should be transpiled by default, so don't bother
+          // transpiling them.
+          'node_modules/**'
+        ],
+
+        presets: [
+          [
+            '@babel/preset-env',
+            {
+              // We already convert CommonJS to ES modules with the `commonjs`
+              // plugin, so Babel doesn't have to do it anymore.
+              modules: false
+            }
+          ]
+        ]
+
       }),
-      uglified &&
-      uglify(
-        {
-          warnings: true,
-          toplevel: !transpiled,
-          sourceMap: true,
-          compress: { passes: 2 },
-          mangle: { properties: false }
-        },
-        uglifier
-      ),
-      filesize()
-    ].filter(Boolean)
+
+      // Minify the code so the filesize becomes smaller.
+      minify && babelMinify(),
+
+      // Show the filesize in the rollup console output.
+			filesize()
+
+    ]
+
   };
+
 }
 
-const config = [
-  getConfig({ src: './gluonjs-template.js', dest: 'build/app.es5.js', format: 'iife', transpiled: true, bundled: true, uglified: false }),
-  getConfig({ src: './gluonjs-template.js', dest: 'build/app.js', format: 'iife', bundled: true, uglified: false }),
-  getConfig({ src: './gluonjs-template.js', dest: 'build/app.es5.min.js', format: 'iife', transpiled: true, bundled: true, uglified: true }),
-  getConfig({ src: './gluonjs-template.js', dest: 'build/app.min.js', format: 'iife', bundled: true, uglified: true })
-];
+function getFileConfigs({ name = '' }) {
+  return [
+    getConfig({ name: name, suffix: '.es5', transpile: true, minify: false }),
+    getConfig({ name: name, suffix: '.es5.min', transpile: true, minify: true }),
+    getConfig({ name: name, transpile: false, minify: false }),
+    getConfig({ name: name, suffix: '.min', transpile: false, minify: true }),
+  ];
+}
 
-export default config;
+let configs = [];
+
+for (const file of files) {
+  configs = configs.concat(getFileConfigs({ name: file }));
+}
+
+export default configs;
